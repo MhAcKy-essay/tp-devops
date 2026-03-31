@@ -16,5 +16,21 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
-    - name: Test Flask import
-      run: python -c "import flask; print('Flask OK')"
+    - name: Run tests
+      run: python -m unittest discover tests
+
+    - name: Build Docker Image
+      run: docker build -t devops-app:latest .
+
+    - name: Deploy container
+      run: |
+        docker stop devops-container || true
+        docker rm devops-container || true
+        docker run -d -p 5001:5000 --name devops-container devops-app:latest
+
+    - name: Test container HTTP
+      run: |
+        echo "Wait 5 seconds..."
+        sleep 5
+        curl -s http://localhost:5001
+
